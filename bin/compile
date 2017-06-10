@@ -12,7 +12,7 @@ CACHE_DIR="${2:-}/neon"
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-export PREFIX="$CACHE_DIR/prefix"
+export PREFIX="$BUILD_DIR/.heroku/neon"
 export RUSTUP_HOME="$CACHE_DIR/rustup"
 export CARGO_HOME="$CACHE_DIR/cargo"
 export PATH="$CARGO_HOME/bin:$PREFIX/bin:$PATH"

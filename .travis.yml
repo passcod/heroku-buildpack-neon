@@ -1,0 +1,15 @@
+os: linux
+sudo: required
+
+services:
+  - docker
+
+script:
+  - set -euo pipefail
+  - cd test
+
+  # Cold cache
+  - docker-compose up
+
+  # Warm cache
+  - docker-compose up

@@ -1,0 +1,71 @@
+#!/bin/bash
+
+set -eu
+
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+ENV_DIR=${3:-}
+BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
+
+mkdir -p "$CACHE_DIR"
+cd "$CACHE_DIR"
+
+if [ ! -f jq ]; then
+  curl "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" > jq
+  chmod +x jq
+fi
+
+engine() {
+  val="$(jq -r ".engines.$1" "$BUILD_DIR/package.json")"
+  if [ "$val" = "null" ]; then
+    if [ -z "$2" ]; then
+      return 1
+    else
+      echo -n "$2"
+    fi
+  else
+    echo -n "$val"
+  fi
+}
+
+node_version="$(engine node lts)"
+npm_version="$(engine npm latest)"
+rust_version="$(engine rust stable)"
+
+export PREFIX="$CACHE_DIR/node"
+export PATH="$PREFIX/bin:$PATH"
+echo "-----> Installing node"
+mkdir -p "$PREFIX"
+curl "https://cdn.jsdelivr.net/gh/isaacs/nave/nave.sh" -sSf \
+  | bash -s -- usemain "$node_version"
+
+echo "-----> Installing npm"
+npm install --global "npm@$npm_version"
+
+export RUSTUP_HOME="$CACHE_DIR/rustup"
+export CARGO_HOME="$CACHE_DIR/cargo"
+export PATH="$CARGO_HOME/bin:$PATH"
+if which rustup 2>&1 >/dev/null; then
+  echo "-----> Installing rust"
+  curl https://sh.rustup.rs -sSf \
+    | sh -s -- -y --default-toolchain="$rust_version"
+else
+  echo "-----> Updating rust"
+  rustup self update
+  rustup update "$rust_version"
+  rustup default "$rust_version"
+fi
+
+echo "-----> Using node $(node --version | cut -c2-)"
+echo "-----> Using npm $(npm --version)"
+echo "-----> Using $(rustc --version)"
+echo "-----> Using $(cargo --version)"
+
+cd "$BUILD_DIR"
+if [ ! -f Procfile ]; then
+  echo "-----> Writing default Procfile"
+  echo "web: npm start" > Procfile
+fi
+
+echo "-----> Building app"
+npm install

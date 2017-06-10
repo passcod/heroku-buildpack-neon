@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  testbuild:
+    image: 'heroku/heroku:16-build'
+    command:
+      - bin/compile
+      - ./neon-test
+      - ./cache
+    environment:
+      HOME: /src
+    volumes:
+      - '../bin:/src/bin'
+      - './neon-test:/src/neon-test'
+    working_dir: '/src'
+

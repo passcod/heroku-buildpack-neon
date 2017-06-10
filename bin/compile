@@ -12,6 +12,16 @@ CACHE_DIR="${2:-}/neon"
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
+# Taken from https://devcenter.heroku.com/articles/buildpack-api
+if [ ! -z "$ENV_DIR" ] && [ -d "$ENV_DIR" ]; then
+  env_blacklist_regex='^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'
+  for e in $(ls $ENV_DIR); do
+    echo "$e" | grep -qvE "$env_blacklist_regex" &&
+    export "$e=$(cat $ENV_DIR/$e)"
+    :
+  done
+fi
+
 export PREFIX="$BUILD_DIR/.heroku/neon"
 export RUSTUP_HOME="$CACHE_DIR/rustup"
 export CARGO_HOME="$CACHE_DIR/cargo"

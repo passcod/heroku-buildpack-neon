@@ -43,8 +43,8 @@ else
   echo "not found"
   echo "-----> Installing jq"
   curl "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" -sSfL \
-    > "$PREFIX/bin/jq"
-  chmod +x "$PREFIX/bin/jq"
+    > "$CARGO_HOME/bin/jq"
+  chmod +x "$CARGO_HOME/bin/jq"
 fi
 
 engine() {

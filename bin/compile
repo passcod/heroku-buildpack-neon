@@ -1,18 +1,29 @@
 #!/bin/bash
 
-set -eu
+set -euo pipefail
 
 BUILD_DIR=${1:-}
-CACHE_DIR=${2:-}
+CACHE_DIR="${2:-}/neon"
 ENV_DIR=${3:-}
 BP_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-mkdir -p "$CACHE_DIR"
+export PREFIX="$CACHE_DIR/prefix"
+export RUSTUP_HOME="$CACHE_DIR/rustup"
+export CARGO_HOME="$CACHE_DIR/cargo"
+export PATH="$CARGO_HOME/bin:$PREFIX/bin:$PATH"
+
+mkdir -p "$CACHE_DIR" "$PREFIX/bin"
 cd "$CACHE_DIR"
 
-if [ ! -f jq ]; then
-  curl "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" > jq
-  chmod +x jq
+echo -n "-----> Looking for jq: "
+if which jq 2>/dev/null; then
+  true
+else
+  echo "not found"
+  echo "-----> Installing jq"
+  curl "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64" -sSfL \
+    > "$PREFIX/bin/jq"
+  chmod +x "$PREFIX/bin/jq"
 fi
 
 engine() {
@@ -28,32 +39,38 @@ engine() {
   fi
 }
 
-node_version="$(engine node lts)"
+resolve() {
+  curl "https://semver.io/node/resolve/$1" -sSf
+}
+
+node_version="$(resolve $(engine node lts))"
 npm_version="$(engine npm latest)"
 rust_version="$(engine rust stable)"
 
-export PREFIX="$CACHE_DIR/node"
-export PATH="$PREFIX/bin:$PATH"
 echo "-----> Installing node"
 mkdir -p "$PREFIX"
-curl "https://cdn.jsdelivr.net/gh/isaacs/nave/nave.sh" -sSf \
-  | bash -s -- usemain "$node_version"
+curl "https://cdn.jsdelivr.net/gh/isaacs/nave/nave.sh" -sSfL > nave.sh
+export SHELL="/bin/bash"
+chmod u+x nave.sh
+./nave.sh usemain "$node_version"
+rm nave.sh
 
 echo "-----> Installing npm"
 npm install --global "npm@$npm_version"
 
-export RUSTUP_HOME="$CACHE_DIR/rustup"
-export CARGO_HOME="$CACHE_DIR/cargo"
-export PATH="$CARGO_HOME/bin:$PATH"
-if which rustup 2>&1 >/dev/null; then
-  echo "-----> Installing rust"
-  curl https://sh.rustup.rs -sSf \
-    | sh -s -- -y --default-toolchain="$rust_version"
-else
+echo -n "-----> Looking for rustup: "
+if which rustup 2>/dev/null; then
   echo "-----> Updating rust"
   rustup self update
   rustup update "$rust_version"
   rustup default "$rust_version"
+else
+  echo "not found"
+  echo "-----> Installing rust"
+  curl https://sh.rustup.rs -sSfL > rustup.sh
+  chmod u+x rustup.sh
+  ./rustup.sh -y --default-toolchain="$rust_version"
+  rm rustup.sh
 fi
 
 echo "-----> Using node $(node --version | cut -c2-)"
@@ -69,3 +86,10 @@ fi
 
 echo "-----> Building app"
 npm install
+
+set +u
+if [ "$TRAVIS" == "true" ] && [ "$CI" == "true" ]; then
+  echo "-----> Looks like we're in Travis"
+  echo "-----> Running app"
+  npm start
+fi

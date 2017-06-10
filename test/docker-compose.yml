@@ -1,16 +1,20 @@
-version: '2'
+version: '3'
 
 services:
   testbuild:
     image: 'heroku/heroku:16-build'
     command:
       - bin/compile
-      - ./neon-test
-      - ./cache
+      - /src/neon-test
+      - /src/cache
     environment:
       HOME: /src
+      TRAVIS: "$TRAVIS"
+      CI: "$CI"
+    network_mode: host
+    user: "$UID:$GROUPS"
     volumes:
+      - '.:/src'
       - '../bin:/src/bin'
-      - './neon-test:/src/neon-test'
     working_dir: '/src'
 

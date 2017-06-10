@@ -28,8 +28,13 @@ export CARGO_HOME="$CACHE_DIR/cargo"
 export PATH="$CARGO_HOME/bin:$PREFIX/bin:$PATH"
 export npm_config_cache="$CACHE_DIR/npm"
 
-mkdir -p "$CACHE_DIR" "$PREFIX/bin"
+mkdir -p "$CACHE_DIR" "$PREFIX/bin" "$BUILD_DIR/.profile.d"
 cd "$CACHE_DIR"
+
+cat <<PROFILE > "$BUILD_DIR/.profile.d/neon-path.sh"
+#!/bin/bash
+export PATH="$PREFIX/bin:\$PATH"
+PROFILE
 
 echo -n "-----> Looking for jq: "
 if which jq 2>/dev/null; then

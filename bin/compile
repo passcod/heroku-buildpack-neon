@@ -33,7 +33,7 @@ cd "$CACHE_DIR"
 
 cat <<PROFILE > "$BUILD_DIR/.profile.d/neon-path.sh"
 #!/bin/bash
-export PATH="$PREFIX/bin:\$PATH"
+export PATH="\$HOME/.heroku/neon/bin:\$PATH"
 PROFILE
 
 echo -n "-----> Looking for jq: "

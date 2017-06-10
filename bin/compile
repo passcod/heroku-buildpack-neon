@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [ "$STACK" != "heroku-16" ]; then
+  echo "Stack is not supported: $STACK"
+  exit 1
+fi
+
 BUILD_DIR=${1:-}
 CACHE_DIR="${2:-}/neon"
 ENV_DIR=${3:-}

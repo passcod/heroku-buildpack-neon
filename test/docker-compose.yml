@@ -8,9 +8,10 @@ services:
       - /src/neon-test
       - /src/cache
     environment:
-      HOME: /src
-      TRAVIS: "$TRAVIS"
       CI: "$CI"
+      HOME: /src
+      STACK: heroku-16
+      TRAVIS: "$TRAVIS"
     network_mode: host
     user: "$UID:$GROUPS"
     volumes:

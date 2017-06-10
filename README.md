@@ -2,7 +2,6 @@ This is a Heroku buildpack for [Neon] with [cargo], [rustup], [node], and [npm],
 as well as build requirements. Features:
 
 - Saves and restores npm and cargo caches.
-- Enables [CCache] for non-pure-Rust builds.
 - Uses the latest stable Rust and Node, or as specified.
 - Defaults to running `npm start` as the web process.
 
@@ -11,7 +10,6 @@ as well as build requirements. Features:
 [npm]: https://www.npmjs.com/
 [Neon]: https://www.neon-bindings.com/
 [node]: https://nodejs.org/
-[CCache]: https://wiki.archlinux.org/index.php/Ccache
 
 ## Specifying which versions to use
 

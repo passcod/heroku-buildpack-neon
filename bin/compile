@@ -26,6 +26,7 @@ export PREFIX="$BUILD_DIR/.heroku/neon"
 export RUSTUP_HOME="$CACHE_DIR/rustup"
 export CARGO_HOME="$CACHE_DIR/cargo"
 export PATH="$CARGO_HOME/bin:$PREFIX/bin:$PATH"
+export npm_config_cache="$CACHE_DIR/npm"
 
 mkdir -p "$CACHE_DIR" "$PREFIX/bin"
 cd "$CACHE_DIR"

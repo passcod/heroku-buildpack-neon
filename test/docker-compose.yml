@@ -5,17 +5,17 @@ services:
     image: 'heroku/heroku:16-build'
     command:
       - bin/compile
-      - /src/neon-test
-      - /src/cache
+      - /app/neon-test
+      - /app/cache
     environment:
       CI: "$CI"
-      HOME: /src
+      HOME: /app
       STACK: heroku-16
       TRAVIS: "$TRAVIS"
     network_mode: host
     user: "$UID:$GROUPS"
     volumes:
-      - '.:/src'
-      - '../bin:/src/bin'
-    working_dir: '/src'
+      - '.:/app'
+      - '../bin:/app/bin'
+    working_dir: '/app'
 

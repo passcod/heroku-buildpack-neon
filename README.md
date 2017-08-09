@@ -42,3 +42,12 @@ This buildpack expects a Node application with a package.json and a
 native/Cargo.toml. It will run `npm install` in the root of the app, then set a
 default Procfile if none exist to run `npm start`. Neon builds should be hooked
 as normal through the `scripts.install` package.json key.
+
+### For non-Neon apps
+
+It's also possible to use this buildpack to run normal non-Neon node apps. Why
+use this instead of the official Node buildpack? Perhaps a Neon component is
+possible in the future. Perhaps you like the caching and version behaviour of
+this buildpack. In any case, simply set `engines.neon` to `false` to disable
+both `native/Cargo.toml` detection and the Rust install. Everything else
+behaves the same.

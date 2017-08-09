@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ -f "$1/package.json" ] && [ -f "$1/native/Cargo.toml" ]; then
+if [ -f "$1/package.json" ] && ([ -f "$1/native/Cargo.toml" ] || grep -qE '"neon"\s*:\s*false' "$1/package.json"); then
     echo "Neon"
     exit 0
 else

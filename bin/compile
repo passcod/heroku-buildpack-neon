@@ -67,6 +67,7 @@ resolve() {
 node_version="$(resolve $(engine node lts))"
 npm_version="$(engine npm latest)"
 rust_version="$(engine rust stable)"
+neon_enabled="$(engine neon true)"
 
 echo "-----> Installing node"
 mkdir -p "$PREFIX"
@@ -79,25 +80,30 @@ rm nave.sh
 echo "-----> Installing npm"
 npm install --global "npm@$npm_version"
 
-echo -n "-----> Looking for rustup: "
-if which rustup 2>/dev/null; then
-  echo "-----> Updating rust"
-  rustup self update
-  rustup update "$rust_version"
-  rustup default "$rust_version"
+if [ "$neon_enabled" = "false" ]; then
+  echo "-----> Skipping rust install (engines.neon == false)"
 else
-  echo "not found"
-  echo "-----> Installing rust"
-  curl https://sh.rustup.rs -sSfL > rustup.sh
-  chmod u+x rustup.sh
-  ./rustup.sh -y --default-toolchain="$rust_version"
-  rm rustup.sh
+  echo -n "-----> Looking for rustup: "
+  if which rustup 2>/dev/null; then
+    echo "-----> Updating rust"
+    rustup self update
+    rustup update "$rust_version"
+    rustup default "$rust_version"
+  else
+    echo "not found"
+    echo "-----> Installing rust"
+    curl https://sh.rustup.rs -sSfL > rustup.sh
+    chmod u+x rustup.sh
+    ./rustup.sh -y --default-toolchain="$rust_version"
+    rm rustup.sh
+  fi
+
+  echo "-----> Using $(rustc --version)"
+  echo "-----> Using $(cargo --version)"
 fi
 
 echo "-----> Using node $(node --version | cut -c2-)"
 echo "-----> Using npm $(npm --version)"
-echo "-----> Using $(rustc --version)"
-echo "-----> Using $(cargo --version)"
 
 cd "$BUILD_DIR"
 if [ ! -f Procfile ]; then
